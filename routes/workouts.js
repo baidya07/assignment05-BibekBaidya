@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { workouts } from '../lib/data';
+import { workouts } from '../lib/data.js';
 
 const router = Router();
 
