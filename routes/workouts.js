@@ -1,13 +1,38 @@
 import {Router} from 'express';
 import { workouts } from '../lib/data.js';
+import { validateWorkoutQuery } from '../lib/validate.js';
 
 const router = Router();
 
 router.get('/', (req, res) => {
-    res.json({
-        count: workouts.length,
-        results: workouts
-    });
+    const {errors, parsed} = validateWorkoutQuery(req.query);
+
+    if(errors.length > 0){
+        return res.status(400).json({ errors });
+    }
+
+    let filtered = workouts;
+
+    if(parsed.q){
+        filtered = filtered.filter((item) =>
+      item.name.toLowerCase().includes(parsed.q));
+    }
+
+    if(parsed.min != undefined){
+        filtered = filtered.filter((item) => item.durationMinutes >= parsed.min);
+    }
+
+    if (parsed.max !== undefined) {
+    filtered = filtered.filter((item) => item.durationMinutes <= parsed.max);
+  }
+
+  const count = filtered.length;
+  const results = filtered.slice(0, parsed.limit);
+
+  res.json({
+    count,
+    results
+  });
 });
 
 router.get('/stats', (req, res) => {
@@ -26,7 +51,7 @@ router.get('/stats', (req, res) => {
             return acc;
         }, {});
 
-        req.json({
+        res.json({
             count,
             averageDurationMinutes,
             byMuscleGroup

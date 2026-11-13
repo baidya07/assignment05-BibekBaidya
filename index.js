@@ -1,5 +1,5 @@
 import express from 'express';
-import workoutsRouter from '/routes/workouts.js';
+import workoutsRouter from './routes/workouts.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
