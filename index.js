@@ -11,6 +11,8 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use(express.urlencoded({ extended: true }));
+
 app.get('/', (req, res)=> {
     res
         .type('text/plain')

@@ -1,6 +1,6 @@
 import {Router} from 'express';
-import { workouts } from '../lib/data.js';
-import { validateWorkoutQuery } from '../lib/validate.js';
+import { workouts, nextId } from '../lib/data.js';
+import { validateWorkoutQuery, validateWorkoutBody } from '../lib/validate.js';
 
 const router = Router();
 
@@ -69,6 +69,23 @@ router.get('/:id', (req, res) => {
     }
 
     res.json(workout);
+});
+
+// POST /workouts — validate form data and create a new workout
+router.post('/', (req, res) => {
+  const { errors, item } = validateWorkoutBody(req.body ?? {});
+
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  const newWorkout = {
+    id: nextId(),
+    ...item
+  };
+
+  workouts.push(newWorkout);
+  res.status(201).json(newWorkout);
 });
 
 export default router;
