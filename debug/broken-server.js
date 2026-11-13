@@ -16,11 +16,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Not found' });
-});
-
 // one note by id
 app.get('/notes/:id', (req, res) => {
   const note = notes.find(n => n.id === Number(req.params.id));
@@ -31,6 +26,11 @@ app.get('/notes/:id', (req, res) => {
 // how many notes?
 app.get('/notes/count', (req, res) => {
   res.json({ count: notes.length });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found' });
 });
 
 app.listen(3001, () => {
