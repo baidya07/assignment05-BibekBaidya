@@ -17,3 +17,12 @@ npm run dev
 | `GET /workouts/2` | `200` | `{"id":2,"name":"Weighted Pull-Ups and Rows","durationMinutes":50,"muscleGroup":"pull","email":"sam@example.com"}` | `HTTP/1.1 200 OK` — `{"id":2,"name":"Weighted Pull-Ups and Rows","durationMinutes":50,"muscleGroup":"pull","email":"sam@example.com"}` | ✅ |
 | `GET /workouts/999` | `404` | `{"error":"Workout 999 not found"}` | `HTTP/1.1 404 Not Found` — `{"error":"Workout 999 not found"}` | ✅ |
 | `GET /nothing-here` | `404` | `{"error":"Not found","path":"/nothing-here"}` | `HTTP/1.1 404 Not Found` — `{"error":"Not found","path":"/nothing-here"}` | ✅ |
+
+## Debugging Log
+
+| # | Symptom (what you saw, include curl output) | Cause | Fix |
+|---|---|---|---|
+| 1 | Both `curl -i -m 5 http://localhost:3001/notes/1` and `/notes/count` hung and timed out with `curl: (28) Operation timed out after 5006 milliseconds with 0 bytes received`. | The request logger middleware did not call `next()`, leaving requests hanging before reaching any route. | Added `next();` at the end of the logger middleware. |
+| 2 | Both requests returned `HTTP/1.1 404 Not Found` with body `{"error":"Not found"}`. | The generic 404 catch-all `app.use` handler was placed before the `/notes` routes and intercepted every request early. | Moved the 404 handler to the bottom of the middleware stack, right before `app.listen()`. |
+| 3 | `GET /notes/1` returned `200 OK` (`{"id":1,"text":"Buy milk"}`), but `GET /notes/count` returned `HTTP/1.1 404 Not Found` with body `{"error":"Note not found"}`. | `GET /notes/:id` was registered before `GET /notes/count`, so `:id` matched `"count"` and looked up `Number("count")` (`NaN`). | Moved `app.get('/notes/count', ...)` above `app.get('/notes/:id', ...)`. |
+
